@@ -30,6 +30,7 @@ class Questionaire {
                 checkbox.name = question.uid;
                 checkbox.classList.add('radio_button');
                 checkbox.dataset.points = answer.points;
+                checkbox.dataset.uid = answer.uid;
                 if(answer.sort == 1){
                     checkbox.checked = true;
                     checkbox.classList.add('main_answer');
@@ -47,6 +48,15 @@ class Questionaire {
                     answer.items.forEach(i => {
                         const item = document.createElement('blockquote');
                         item.innerHTML = `Check out <a href="${i.url}">${i.name}</a> (${i.type}).`;
+                        switch (i.type) {
+                            case "video":
+                                const video_id = i.url.split('=').slice(-1);
+                                item.innerHTML += `<br><iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/${video_id}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                                break;
+                        
+                            default:
+                                break;
+                        }
                         if(i.note){
                             item.innerHTML += `<br>${i.note}`;
                         }
@@ -75,6 +85,25 @@ class Questionaire {
             }
             score.innerHTML = `You reached a score of ${points}/${max_points}.`;
             container.appendChild(score);
+            const ids = Array.from(document.getElementsByClassName('radio_button')).filter((i) => i.checked && !i.classList.contains('main_answer')).map(i => i.name);
+            // refactoring further reading aggregation 
+            const further_reading = questions.filter(i => ids.includes(i.uid)).map(i => i.answers.filter(i => i.sort == 2 && i.items.length )).filter(i => i.length).map(i => i[0].items);
+            // Build further reading section, maybe with print stylesheet.
+            if(document.getElementById('further_reading')){
+                document.getElementById('further_reading').remove();
+            }
+            if(further_reading.length){
+                const further_reading_container = document.createElement('div');
+                further_reading_container.innerHTML += `<h2>Was du dir noch einmal anschauen solltest:</h2>`;
+                further_reading_container.id = 'further_reading';
+                further_reading.forEach(i => {
+                    i.forEach(i => {
+                        further_reading_container.innerHTML += `<div class="further_reading_entry"><h3>${i.name}</h3><p><a href="${i.url}">${i.url}</a></p><p>${i.type}</p><p>${i.note}</p></div>`;
+                    })
+                })
+                container.appendChild(further_reading_container);
+            }
+            console.log(further_reading);
         })
         container.appendChild(evaluate_button);
     }
