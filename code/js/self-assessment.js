@@ -102,6 +102,8 @@ class Questionaire {
                     })
                 })
                 container.appendChild(further_reading_container);
+                console.log(further_reading_container);
+                further_reading_container.scrollIntoView({behavior: "smooth"});
             }
             console.log(further_reading);
         })
